@@ -1,124 +1,65 @@
-import streamlit as st
+import os
 import sqlite3
 import pandas as pd
+import streamlit as st
 import plotly.express as px
 
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error, r2_score
+
 DB_PATH = "data/processed/jobs.db"
+TABLE_NAME = "jobs"
+SAMPLE_CSV = "data/sample/salaries_sample.csv"
 
 st.set_page_config(page_title="Job Market Dashboard", layout="wide")
-
 st.title("📊 Job Market Analytics Dashboard")
-st.markdown("Data Engineering Portfolio Project")
+st.caption("ETL → SQLite → SQL Analytics → (Mini) ML Salary Predictor")
+
 
 # ------------------------
-# Load data
+# Helpers: ensure DB exists (for Streamlit Cloud / portable demo)
 # ------------------------
-@st.cache_data
-def load_data():
+def ensure_sqlite_db():
+    """
+    If local SQLite DB doesn't exist (e.g., Streamlit Cloud),
+    create it from the versioned sample CSV included in the repo.
+    """
+    if os.path.exists(DB_PATH):
+        return
+
+    if not os.path.exists(SAMPLE_CSV):
+        raise FileNotFoundError(
+            f"Database not found at: {DB_PATH}\n"
+            f"Sample CSV not found at: {SAMPLE_CSV}\n\n"
+            "Fix:\n"
+            "- Generate sample: python src/make_sample.py\n"
+            "- Or run full pipeline locally: python src/etl.py && python src/load.py"
+        )
+
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    df = pd.read_csv(SAMPLE_CSV)
+
     with sqlite3.connect(DB_PATH) as conn:
-        df = pd.read_sql_query("SELECT * FROM jobs", conn)
+        df.to_sql(TABLE_NAME, conn, if_exists="replace", index=False)
+
+        # Indexes for faster filtering/aggregations
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_jobs_year ON {TABLE_NAME}(work_year);")
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_jobs_title ON {TABLE_NAME}(job_title);")
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_jobs_location ON {TABLE_NAME}(company_location);")
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_jobs_experience ON {TABLE_NAME}(experience_level);")
+        conn.commit()
+
+
+@st.cache_data
+def load_data_from_sqlite() -> pd.DataFrame:
+    ensure_sqlite_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
     return df
 
 
-df = load_data()
-
-# ------------------------
-# Sidebar Filters
-# ------------------------
-st.sidebar.header("Filters")
-
-years = sorted(df["work_year"].unique())
-selected_year = st.sidebar.selectbox("Select Year", years)
-
-experience_levels = df["experience_level"].unique()
-selected_experience = st.sidebar.multiselect(
-    "Experience Level", experience_levels, default=experience_levels
-)
-
-locations = df["company_location"].unique()
-selected_location = st.sidebar.multiselect(
-    "Company Location", locations, default=["US"]
-)
-
-remote_options = df["remote_ratio"].unique()
-selected_remote = st.sidebar.multiselect(
-    "Remote Ratio", remote_options, default=remote_options
-)
-
-# Apply filters
-filtered_df = df[
-    (df["work_year"] == selected_year) &
-    (df["experience_level"].isin(selected_experience)) &
-    (df["company_location"].isin(selected_location)) &
-    (df["remote_ratio"].isin(selected_remote))
-]
-
-# ------------------------
-# KPI Section
-# ------------------------
-col1, col2, col3 = st.columns(3)
-
-col1.metric("Total Jobs", f"{len(filtered_df):,}")
-col2.metric("Average Salary (USD)", f"{filtered_df['salary_in_usd'].mean():,.0f}")
-col3.metric("Median Salary (USD)", f"{filtered_df['salary_in_usd'].median():,.0f}")
-
-st.markdown("---")
-
-# ------------------------
-# Salary Distribution
-# ------------------------
-st.subheader("Salary Distribution")
-
-fig_salary = px.histogram(
-    filtered_df,
-    x="salary_in_usd",
-    nbins=50,
-    title="Salary Distribution",
-)
-
-st.plotly_chart(fig_salary, use_container_width=True)
-
-# ------------------------
-# Top Job Titles
-# ------------------------
-st.subheader("Top Job Titles")
-
-top_titles = (
-    filtered_df["job_title"]
-    .value_counts()
-    .head(10)
-    .reset_index()
-)
-
-top_titles.columns = ["job_title", "count"]
-
-fig_titles = px.bar(
-    top_titles,
-    x="count",
-    y="job_title",
-    orientation="h",
-    title="Top 10 Job Titles"
-)
-
-st.plotly_chart(fig_titles, use_container_width=True)
-
-# ------------------------
-# Salary by Experience
-# ------------------------
-st.subheader("Average Salary by Experience Level")
-
-salary_by_exp = (
-    filtered_df
-    .groupby("experience_level")["salary_in_usd"]
-    .mean()
-    .reset_index()
-)
-
-fig_exp = px.bar(
-    salary_by_exp,
-    x="experience_level",
-    y="salary_in_usd",
-    title="Average Salary by Experience Level"
-)
-
-st.plotly_chart(fig_exp, use_container_width=True)
+df = load_data_from_sqlite()
