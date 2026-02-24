@@ -1,49 +1,198 @@
-# 📊 Job Market Data Pipeline (CSV → Clean Dataset → Metrics)
+📊 Job Market Data Pipeline (CSV → ETL → SQLite → SQL Analytics)
 
-An end-to-end mini data engineering project built from a real-world salary dataset (`salaries.csv`).
-It includes a reproducible ETL pipeline (Python + Pandas) that cleans the data, removes duplicates, and outputs **CV-ready metrics** for analytics and BI.
+An end-to-end mini Data Engineering project built from a real-world salary dataset (salaries.csv).
 
-This repository is designed to demonstrate core skills aligned with graduate data roles:
-- **Data Engineering** (ETL, data quality, reproducible pipeline)
-- **Data Analysis / BI** (key KPIs and insights)
-- **Professional practices** (project structure, virtual environment, Git hygiene)
+This repository demonstrates graduate-level skills aligned with Data Engineer, Data Analyst, and BI Developer roles:
 
----
+✅ Reproducible ETL pipeline (Python + Pandas)
 
-## ✅ Current Output (from ETL run)
+✅ Data quality validation (duplicates, missing values)
 
-From the latest run on the provided dataset:
+✅ Business KPI computation
 
-- **Records processed:** 105,434
-- **Duplicates removed:** 52,997 (**50.3%**)
-- **Missing values:** 0 (before/after cleaning)
+✅ SQLite database integration
 
-### Key Insights
-- **Average salary (USD):** 151,665  
-- **Median salary (USD):** 139,475  
-- **Top roles:** Data Scientist, Data Engineer, Data Analyst  
-- **Remote adoption:** ~24.45% fully remote  
-- **Top locations:** US, CA, GB
+✅ SQL analytical queries
 
-> Note: Numbers may vary depending on the dataset version.
+✅ Clean repository structure & Git hygiene
 
----
+🚀 Project Overview
 
-## 🏗 Project Structure
+The objective of this project is to simulate a real-world data workflow:
 
-```text
+Ingest raw job salary data
+
+Clean and standardize it
+
+Compute business-ready KPIs
+
+Load cleaned data into a relational database
+
+Run analytical SQL queries for BI insights
+
+This mirrors a simplified production-style data pipeline.
+
+📂 Project Structure
 job-market-data-pipeline/
-├─ app/                    # Streamlit dashboard (coming next)
+├─ app/                     # (Next step: Streamlit dashboard)
 │  └─ streamlit_app.py
+│
 ├─ data/
-│  ├─ raw/                 # Place raw CSV here (not tracked by git)
-│  └─ processed/           # Cleaned output (not tracked by git)
-├─ notebooks/              # Exploration notebooks (optional)
+│  ├─ raw/                  # Raw dataset (NOT tracked by git)
+│  └─ processed/            # Cleaned data + SQLite DB (NOT tracked)
+│
+├─ notebooks/               # Optional exploration notebooks
+│
 ├─ src/
-│  ├─ etl.py               # CSV → cleaned CSV + metrics
-│  ├─ transform.py         # (reserved)
-│  ├─ load.py              # (next step: SQLite load)
-│  ├─ skills_extraction.py # (reserved)
-├─ tests/                  # (optional)
+│  ├─ etl.py                # CSV → cleaned CSV + KPI metrics
+│  ├─ load.py               # Load cleaned CSV into SQLite
+│  ├─ sql_metrics.py        # Analytical SQL queries
+│  ├─ transform.py          # (Reserved for future transformations)
+│  └─ skills_extraction.py  # (Reserved for future NLP)
+│
+├─ tests/                   # (Future automated tests)
 ├─ requirements.txt
 └─ README.md
+📦 Dataset
+
+This project expects a CSV file named:
+
+salaries.csv
+
+Place it in:
+
+data/raw/salaries.csv
+
+Expected columns:
+
+work_year,experience_level,employment_type,job_title,salary,
+salary_currency,salary_in_usd,employee_residence,
+remote_ratio,company_location,company_size
+
+⚠️ The dataset is not committed to GitHub (best practice for data projects).
+
+⚙️ Setup (WSL / Linux / macOS)
+1️⃣ Clone the repository
+git clone https://github.com/YOUR_USERNAME/job-market-data-pipeline.git
+cd job-market-data-pipeline
+2️⃣ Create a virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+You should now see (venv) in your terminal.
+
+3️⃣ Install dependencies
+pip install -r requirements.txt
+▶️ Run the ETL Pipeline
+python src/etl.py
+What the ETL does:
+
+Loads 100k+ salary records
+
+Removes duplicate entries
+
+Standardizes experience levels
+
+Validates missing values
+
+Computes salary KPIs
+
+Exports cleaned dataset to:
+
+data/processed/salaries_cleaned.csv
+📊 Example Output Metrics
+
+From the current dataset:
+
+Records processed: 105,434
+
+Duplicates removed: 52,997 (50.3%)
+
+Average salary (USD): 151,665
+
+Median salary (USD): 139,475
+
+Top roles: Data Scientist, Data Engineer, Data Analyst
+
+Remote ratio: ~24.45% fully remote
+
+Top locations: US, CA, GB
+
+(Results may vary depending on dataset version.)
+
+🗄 Load Data into SQLite
+
+Create a local SQLite database from the cleaned dataset:
+
+python src/load.py
+
+This generates:
+
+data/processed/jobs.db
+
+Automatically created indexes:
+
+work_year
+
+job_title
+
+company_location
+
+experience_level
+
+These improve analytical query performance.
+
+📈 Run Analytical SQL Queries
+python src/sql_metrics.py
+
+This produces portfolio-ready analytics including:
+
+Top 10 job titles
+
+Salary by experience level
+
+Remote distribution (%)
+
+Top 10 locations
+
+US-specific job demand
+
+🧠 Skills Demonstrated
+
+✔ Data ingestion and transformation
+✔ Data quality validation
+✔ KPI generation for BI
+✔ Relational database integration
+✔ SQL aggregation queries
+✔ Clean project architecture
+✔ Git best practices (raw data ignored)
+
+🔜 Roadmap
+
+Build Streamlit dashboard connected to SQLite
+
+Add automated tests (pytest)
+
+Add CI with GitHub Actions
+
+Extend to skill extraction (NLP pipeline)
+
+Deploy dashboard publicly
+
+🛠 Technical Stack
+
+Python
+
+Pandas
+
+SQLite
+
+SQL
+
+Streamlit (next phase)
+
+Git & GitHub
+
+📄 License
+
+MIT
