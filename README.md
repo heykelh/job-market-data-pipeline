@@ -1,198 +1,324 @@
-📊 Job Market Data Pipeline (CSV → ETL → SQLite → SQL Analytics)
+# 📊 Job Market Analytics Dashboard + 🤖 ML Salary Predictor
 
-An end-to-end mini Data Engineering project built from a real-world salary dataset (salaries.csv).
+End-to-end Data Engineering + Analytics + baseline Machine Learning project built from a real-world salary dataset and deployed as an interactive Streamlit application.
 
-This repository demonstrates graduate-level skills aligned with Data Engineer, Data Analyst, and BI Developer roles:
+**Live Demo:** https://job-market-data-pipeline-heykelh.streamlit.app/#job-market-analytics-dashboard
 
-✅ Reproducible ETL pipeline (Python + Pandas)
+---
 
-✅ Data quality validation (duplicates, missing values)
+## 🚀 Project Overview
 
-✅ Business KPI computation
+This project simulates a realistic applied data workflow:
 
-✅ SQLite database integration
+Raw CSV → Data Cleaning → Business Metrics → SQLite Database → Interactive Dashboard → Machine Learning Model → Cloud Deployment
 
-✅ SQL analytical queries
+It demonstrates practical skills aligned with:
 
-✅ Clean repository structure & Git hygiene
+- Data Engineering
+- Business Intelligence / Analytics
+- Machine Learning
+- Cloud Deployment
 
-🚀 Project Overview
+---
 
-The objective of this project is to simulate a real-world data workflow:
+## 📌 Data Source
 
-Ingest raw job salary data
+Primary dataset:
 
-Clean and standardize it
+Data Science Salaries 2025 (Kaggle)  
+https://www.kaggle.com/datasets/arnabchaki/data-science-salaries-2025?resource=download&select=salaries.csv
 
-Compute business-ready KPIs
+Dataset file used: `salaries.csv`
 
-Load cleaned data into a relational database
+Main columns:
 
-Run analytical SQL queries for BI insights
+- work_year  
+- experience_level  
+- employment_type  
+- job_title  
+- salary  
+- salary_currency  
+- salary_in_usd  
+- employee_residence  
+- remote_ratio  
+- company_location  
+- company_size  
 
-This mirrors a simplified production-style data pipeline.
+---
 
-📂 Project Structure
+## 🧪 Why a Versioned Sample Dataset Is Used
+
+The original Kaggle dataset contains over 100,000 rows.
+
+For deployment reliability and fast startup on Streamlit Cloud, this repository includes a curated sample:
+
+`data/sample/salaries_sample.csv`
+
+Why this is good engineering practice:
+
+- Ensures reproducibility  
+- Removes dependency on external downloads  
+- Prevents network failures during demo  
+- Improves cloud startup performance  
+- Keeps repository lightweight  
+- Guarantees reliable interview demonstration  
+
+In a production system, the full dataset would be stored in cloud storage (S3, GCS, Azure Blob) or a data warehouse and ingested automatically.
+
+---
+
+## 🗂 Repository Structure
+
+```
 job-market-data-pipeline/
-├─ app/                     # (Next step: Streamlit dashboard)
+├─ app/
 │  └─ streamlit_app.py
-│
 ├─ data/
-│  ├─ raw/                  # Raw dataset (NOT tracked by git)
-│  └─ processed/            # Cleaned data + SQLite DB (NOT tracked)
-│
-├─ notebooks/               # Optional exploration notebooks
-│
+│  └─ sample/
+│     └─ salaries_sample.csv
 ├─ src/
-│  ├─ etl.py                # CSV → cleaned CSV + KPI metrics
-│  ├─ load.py               # Load cleaned CSV into SQLite
-│  ├─ sql_metrics.py        # Analytical SQL queries
-│  ├─ transform.py          # (Reserved for future transformations)
-│  └─ skills_extraction.py  # (Reserved for future NLP)
-│
-├─ tests/                   # (Future automated tests)
+│  ├─ etl.py
+│  ├─ load.py
+│  ├─ sql_metrics.py
+│  └─ make_sample.py
 ├─ requirements.txt
 └─ README.md
-📦 Dataset
+```
 
-This project expects a CSV file named:
+---
 
-salaries.csv
+## ⚙️ Local Setup (Linux / WSL / macOS)
 
-Place it in:
+### 1. Create virtual environment
 
-data/raw/salaries.csv
-
-Expected columns:
-
-work_year,experience_level,employment_type,job_title,salary,
-salary_currency,salary_in_usd,employee_residence,
-remote_ratio,company_location,company_size
-
-⚠️ The dataset is not committed to GitHub (best practice for data projects).
-
-⚙️ Setup (WSL / Linux / macOS)
-1️⃣ Clone the repository
-git clone https://github.com/YOUR_USERNAME/job-market-data-pipeline.git
-cd job-market-data-pipeline
-2️⃣ Create a virtual environment
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
 
-You should now see (venv) in your terminal.
+### 2. Install dependencies
 
-3️⃣ Install dependencies
+```bash
 pip install -r requirements.txt
-▶️ Run the ETL Pipeline
+```
+
+---
+
+## ▶️ Running the Project
+
+### ETL (Full Dataset - Local Only)
+
+Place Kaggle file in:
+
+```
+data/raw/salaries.csv
+```
+
+Then run:
+
+```bash
 python src/etl.py
-What the ETL does:
+```
 
-Loads 100k+ salary records
+Outputs:
 
-Removes duplicate entries
+- Cleaned dataset  
+- Duplicate removal metrics  
+- Salary distribution metrics  
+- Remote work adoption metrics  
 
-Standardizes experience levels
+---
 
-Validates missing values
+### Load into SQLite (Local Only)
 
-Computes salary KPIs
-
-Exports cleaned dataset to:
-
-data/processed/salaries_cleaned.csv
-📊 Example Output Metrics
-
-From the current dataset:
-
-Records processed: 105,434
-
-Duplicates removed: 52,997 (50.3%)
-
-Average salary (USD): 151,665
-
-Median salary (USD): 139,475
-
-Top roles: Data Scientist, Data Engineer, Data Analyst
-
-Remote ratio: ~24.45% fully remote
-
-Top locations: US, CA, GB
-
-(Results may vary depending on dataset version.)
-
-🗄 Load Data into SQLite
-
-Create a local SQLite database from the cleaned dataset:
-
+```bash
 python src/load.py
+```
 
-This generates:
+Creates:
 
+```
 data/processed/jobs.db
+```
 
-Automatically created indexes:
+Indexes created:
 
-work_year
+- work_year  
+- job_title  
+- company_location  
+- experience_level  
 
-job_title
+---
 
-company_location
+### Run SQL KPI Queries
 
-experience_level
-
-These improve analytical query performance.
-
-📈 Run Analytical SQL Queries
+```bash
 python src/sql_metrics.py
+```
 
-This produces portfolio-ready analytics including:
+Examples:
 
-Top 10 job titles
+- Top job titles  
+- Salary by experience  
+- Remote distribution  
+- Top hiring countries  
 
-Salary by experience level
+---
 
-Remote distribution (%)
+### Run Streamlit App
 
-Top 10 locations
+```bash
+streamlit run app/streamlit_app.py
+```
 
-US-specific job demand
+The deployed cloud version automatically uses the versioned sample dataset.
 
-🧠 Skills Demonstrated
+---
 
-✔ Data ingestion and transformation
-✔ Data quality validation
-✔ KPI generation for BI
-✔ Relational database integration
-✔ SQL aggregation queries
-✔ Clean project architecture
-✔ Git best practices (raw data ignored)
+## 📊 Dashboard Features
 
-🔜 Roadmap
+- Interactive filters (year, experience, location, remote ratio)
+- KPI cards (job count, avg salary, median salary, remote %)
+- Salary distribution histogram
+- Top job titles
+- Salary by experience visualization
+- Live ML prediction tab
 
-Build Streamlit dashboard connected to SQLite
+---
 
-Add automated tests (pytest)
+## 🤖 Machine Learning Model
 
-Add CI with GitHub Actions
+A baseline Ridge Regression model predicts `salary_in_usd`.
 
-Extend to skill extraction (NLP pipeline)
+### Features Used
 
-Deploy dashboard publicly
+- work_year  
+- experience_level  
+- employment_type  
+- job_title  
+- remote_ratio  
+- company_location  
+- company_size  
 
-🛠 Technical Stack
+Categorical variables are encoded using OneHotEncoder.
 
-Python
+Pipeline:
 
-Pandas
+Preprocessing → Ridge Regression
 
-SQLite
+---
 
-SQL
+## 📈 ML Evaluation Metrics Explained
 
-Streamlit (next phase)
+### MAE (Mean Absolute Error)
 
-Git & GitHub
+Average absolute difference between predicted and actual salary.
 
-📄 License
+Example:
 
-MIT
+MAE = 18,000 USD  
+→ Predictions are off by $18k on average.
+
+Lower MAE indicates better performance.
+
+---
+
+### R² (Coefficient of Determination)
+
+Measures how much of salary variance is explained by the model.
+
+- 1.0 → Perfect prediction  
+- 0.0 → Equivalent to predicting mean  
+- Negative → Worse than baseline  
+
+Example:
+
+R² = 0.62  
+→ 62% of salary variability is explained by selected features.
+
+Note: This is a baseline model designed to demonstrate workflow, not a production-grade predictor.
+
+---
+
+## ✅ What This Project Demonstrates
+
+Data Engineering:
+
+- Structured ETL pipeline  
+- Data quality validation  
+- Clean data layering  
+- SQLite indexing  
+
+Analytics:
+
+- KPI extraction  
+- Interactive BI dashboard  
+
+Machine Learning:
+
+- Feature encoding  
+- Model training & evaluation  
+- Live inference  
+
+Deployment:
+
+- Streamlit Cloud hosting  
+- Portable data architecture  
+- Reproducible environment  
+
+---
+
+## 🔭 Potential Improvements
+
+Data Quality:
+
+- Outlier detection  
+- Inflation-adjusted salary comparisons  
+- Better deduplication logic  
+- Missing value imputation  
+
+Feature Engineering:
+
+- Job title normalization  
+- Regional economic indicators  
+- Skill extraction via NLP  
+
+Modeling:
+
+- Gradient boosting models  
+- Cross-validation  
+- Hyperparameter tuning  
+- Feature importance visualization  
+- SHAP explainability  
+
+Architecture:
+
+- PostgreSQL instead of SQLite  
+- dbt transformations  
+- Airflow orchestration  
+- CI/CD pipelines  
+- REST API for inference  
+
+---
+
+## 🧾 Tech Stack
+
+- Python  
+- Pandas  
+- SQLite  
+- Streamlit  
+- Plotly  
+- Scikit-learn  
+- Git & GitHub  
+
+---
+
+## 🎯 Conclusion
+
+This project demonstrates a complete applied data lifecycle:
+
+Raw data → Cleaned dataset → Database → Analytics → Machine Learning → Cloud deployment
+
+It showcases structured engineering thinking, analytical reasoning, and deployable ML capability suitable for graduate-level data roles.
+
+---
